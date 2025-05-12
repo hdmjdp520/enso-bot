@@ -1,0 +1,97 @@
+// 自动点击所有网站按钮的脚本
+// 使用方法：将此代码复制到浏览器控制台中执行
+
+(async function() {
+    // 定义点击间隔时间（毫秒）
+    const clickDelay = 1000;
+    // 定义页面间跳转延迟（毫秒）
+    const pageDelay = 2000;
+    // 总页数
+    const totalPages = 7;
+    
+    // 等待函数
+    const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    // 点击当前页面上的所有网站按钮
+    async function clickAllButtonsOnCurrentPage() {
+        // 获取当前页面上所有网站按钮
+        // 这里使用了两种选择器来增加兼容性
+        const buttons = document.querySelectorAll("a.w-full button") || 
+                       document.querySelectorAll("div.grid button");
+        
+        console.log(`在当前页面找到 ${buttons.length} 个按钮`);
+        
+        // 逐个点击按钮
+        for (let i = 0; i < buttons.length; i++) {
+            const button = buttons[i];
+            // 获取网站名称以便记录
+            let siteName = "";
+            try {
+                // 尝试从按钮内部获取网站名称
+                const nameElement = button.querySelector("div.text-\\[16px\\]") || 
+                                   button.querySelector("div.flex.flex-col.items-start div:first-child");
+                if (nameElement) {
+                    siteName = nameElement.textContent;
+                }
+            } catch (e) {
+                siteName = "未知网站";
+            }
+            
+            console.log(`点击第 ${i+1} 个按钮: ${siteName}`);
+            
+            // 模拟点击
+            try {
+                http://button.click();
+                console.log(`成功点击: ${siteName}`);
+            } catch (e) {
+                console.error(`点击 ${siteName} 时出错:`, e);
+            }
+            
+            // 等待指定时间再点击下一个
+            await sleep(clickDelay);
+        }
+    }
+    
+    // 点击下一页按钮
+    async function goToNextPage() {
+        const nextButton = document.querySelector(".rc-pagination-next button") || 
+                          document.querySelector("ul > li.rc-pagination-next > button");
+        
+        if (nextButton && !nextButton.disabled) {
+            console.log("点击下一页按钮");
+            http://nextButton.click();
+            return true;
+        }
+        
+        console.log("没有找到下一页按钮或已到最后一页");
+        return false;
+    }
+    
+    // 主函数：处理所有页面
+    async function processAllPages() {
+        console.log("开始自动点击程序...");
+        
+        for (let page = 1; page <= totalPages; page++) {
+            console.log(`正在处理第 ${page} 页，共 ${totalPages} 页`);
+            
+            // 点击当前页面上的所有按钮
+            await clickAllButtonsOnCurrentPage();
+            
+            // 如果不是最后一页，则点击下一页按钮
+            if (page < totalPages) {
+                const success = await goToNextPage();
+                if (!success) {
+                    console.log("无法前往下一页，提前终止程序");
+                    break;
+                }
+                // 等待页面加载
+                await sleep(pageDelay);
+            }
+        }
+        
+        console.log("所有网站按钮点击完成！");
+    }
+    
+    // 启动程序
+    await processAllPages();
+})();
